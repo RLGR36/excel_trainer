@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <title>Luckysheet — Тренажёр с заданиями</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/luckysheet@2.1.13/dist/plugins/css/pluginsCss.css" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/luckysheet@2.1.13/dist/css/luckysheet.css" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/luckysheet@2.1.13/dist/assets/iconfont/iconfont.css" />
+  <style>
+    html, body { height: 100%; margin: 0; padding: 0; }
+    #luckysheet { width: 100vw; height: 400px; min-height: 300px; }
+    #tasks { max-width: 600px; margin: 30px auto; font-family: Arial, sans-serif; }
+    .task-block { background: #f7f7f7; border-radius: 8px; padding: 20px; }
+    .task-title { font-size: 20px; font-weight: bold; margin-bottom: 10px; }
+    .task-step { background: #eaeaea; border-radius: 5px; margin: 8px 0; padding: 10px; font-size: 16px; transition: background 0.3s; }
+    .task-step.done { background: #d4edda; color: #155724; font-weight: bold; }
+    .task-step.current { background: #fff3cd; color: #856404; }
+    .task-progress { margin-top: 15px; font-size: 16px; }
+  </style>
+</head>
+<body>
+  <div id="luckysheet"></div>
+  <div id="tasks">
+    <div class="task-block">
+      <div class="task-title">Задание 1: Основы работы</div>
+      <div id="step-1" class="task-step">1. Выделите ячейку <b>A1</b></div>
+      <div id="step-2" class="task-step">2. Введите <b>100</b> в ячейку <b>B2</b></div>
+      <div id="step-3" class="task-step">3. Введите любое число в ячейку <b>C3</b></div>
+      <div id="progress" class="task-progress">Выполняйте шаги задания... (0/3)</div>
+    </div>
+  </div>
+  <script src="https://cdn.jsdelivr.net/npm/luckysheet@2.1.13/dist/plugins/js/plugin.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/luckysheet@2.1.13/dist/luckysheet.umd.js"></script>
+  <script>
+    let steps = [false, false, false];
+
+    function updateSteps() {
+      for (let i = 0; i < 3; i++) {
+        const el = document.getElementById('step-' + (i+1));
+        el.classList.remove('done', 'current');
+        if (steps[i]) {
+          el.classList.add('done');
+        } else if (!steps.slice(0, i).includes(false)) {
+          el.classList.add('current');
+          break;
+        }
+      }
+      const doneCount = steps.filter(Boolean).length;
+      document.getElementById('progress').textContent =
+        doneCount === 3
+          ? 'Задание выполнено! (3/3)'
+          : `Выполняйте шаги задания... (${doneCount}/3)`;
+    }
+
+    window.onload = function() {
+      luckysheet.create({
+        container: 'luckysheet',
+        lang: 'ru',
+        data: [
+          [{}, {}, {}, {}, {}, {}, {}, {}, {}, {}],
+          [{}, {}, {}, {}, {}, {}, {}, {}, {}, {}],
+          [{}, {}, {}, {}, {}, {}, {}, {}, {}, {}]
+        ],
+        showinfobar: true,
+        showtoolbar: true,
+        showsheetbar: true,
+        showstatisticBar: true,
+        allowEdit: true,
+        enableAddRow: true,
+        enableAddCol: true,
+        hook: {
+          rangeSelect: function (range) {
+            if (
+              range.length === 1 &&
+              range[0].row[0] === 0 && range[0].row[1] === 0 &&
+              range[0].column[0] === 0 && range[0].column[1] === 0
+            ) {
+              steps[0] = true;
+              updateSteps();
+            }
+          },
+          cellUpdated: function (r, c, oldValue, newValue, isRefresh) {
+            if (r === 1 && c === 1 && newValue === "100") {
+              steps[1] = true;
+              updateSteps();
+            }
+            if (r === 2 && c === 2 && !isNaN(Number(newValue)) && newValue !== "") {
+              steps[2] = true;
+              updateSteps();
+            }
+          }
+        }
+      });
+      updateSteps();
+    }
+  </script>
+</body>
+</html>
