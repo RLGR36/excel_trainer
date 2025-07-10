@@ -31,84 +31,84 @@
   </div>
   <script src="https://cdn.jsdelivr.net/npm/luckysheet@2.1.13/dist/plugins/js/plugin.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/luckysheet@2.1.13/dist/luckysheet.umd.js"></script>
-<script>
-  let lastSelection = null;
-  let step1done = false, step2done = false, step3done = false;
+  <script>
+    let lastSelection = null;
+    let step1done = false, step2done = false, step3done = false;
 
-  function getCellValue(r, c) {
-    const data = luckysheet.getAllSheets()[0].data;
-    if (data && data[r] && data[r][c]) {
-      if (data[r][c].v !== undefined) return data[r][c].v;
-      if (data[r][c].m !== undefined) return data[r][c].m;
-      if (data[r][c].ct && data[r][c].ct.fa) return data[r][c].ct.fa;
-    }
-    return "";
-  }
-
-  function checkSteps() {
-    // 1. Проверка выделения A1
-    if (lastSelection &&
-        lastSelection.length === 1 &&
-        lastSelection[0].row[0] === 0 && lastSelection[0].row[1] === 0 &&
-        lastSelection[0].column[0] === 0 && lastSelection[0].column[1] === 0
-    ) {
-      step1done = true;
-    }
-
-    // 2. Проверка B2
-    let valB2 = getCellValue(1, 1);
-    if (valB2 === "100" || valB2 === 100) step2done = true;
-
-    // 3. Проверка C3
-    let valC3 = getCellValue(2, 2);
-    if (valC3 !== "" && !isNaN(Number(valC3))) step3done = true;
-
-    // Подсветка
-    const steps = [step1done, step2done, step3done];
-    for (let i = 0; i < 3; i++) {
-      const el = document.getElementById('step-' + (i+1));
-      el.classList.remove('done', 'current');
-      if (steps[i]) {
-        el.classList.add('done');
-      } else if (!steps.slice(0, i).includes(false)) {
-        el.classList.add('current');
+    function getCellValue(r, c) {
+      const data = luckysheet.getAllSheets()[0].data;
+      if (data && data[r] && data[r][c]) {
+        if (data[r][c].v !== undefined) return data[r][c].v;
+        if (data[r][c].m !== undefined) return data[r][c].m;
+        if (data[r][c].ct && data[r][c].ct.fa) return data[r][c].ct.fa;
       }
+      return "";
     }
-    const doneCount = steps.filter(Boolean).length;
-    document.getElementById('progress').textContent =
-      doneCount === 3
-        ? 'Task completed! (3/3)'
-        : `Complete the steps... (${doneCount}/3)`;
-  }
 
-  window.onload = function() {
-    luckysheet.create({
-      container: 'luckysheet',
-      lang: 'en',
-      data: [
-        [{}, {}, {}, {}, {}, {}, {}, {}, {}, {}],
-        [{}, {}, {}, {}, {}, {}, {}, {}, {}, {}],
-        [{}, {}, {}, {}, {}, {}, {}, {}, {}, {}]
-      ],
-      showinfobar: true,
-      showtoolbar: true,
-      showsheetbar: true,
-      showstatisticBar: true,
-      allowEdit: true,
-      enableAddRow: true,
-      enableAddCol: true,
-      hook: {
-        rangeSelect: function (range) {
-          lastSelection = range;
-          setTimeout(checkSteps, 100);
-        },
-        cellUpdated: function (r, c, oldValue, newValue, isRefresh) {
-          setTimeout(checkSteps, 100);
+    function checkSteps() {
+      // 1. Проверка: хотя бы раз выделили A1
+      if (!step1done && lastSelection &&
+          lastSelection.length === 1 &&
+          lastSelection[0].row[0] === 0 && lastSelection[0].row[1] === 0 &&
+          lastSelection[0].column[0] === 0 && lastSelection[0].column[1] === 0
+      ) {
+        step1done = true;
+      }
+
+      // 2. Проверка B2
+      let valB2 = getCellValue(1, 1);
+      if (!step2done && (valB2 === "100" || valB2 === 100)) step2done = true;
+
+      // 3. Проверка C3
+      let valC3 = getCellValue(2, 2);
+      if (!step3done && valC3 !== "" && !isNaN(Number(valC3))) step3done = true;
+
+      // Подсветка
+      const steps = [step1done, step2done, step3done];
+      for (let i = 0; i < 3; i++) {
+        const el = document.getElementById('step-' + (i+1));
+        el.classList.remove('done', 'current');
+        if (steps[i]) {
+          el.classList.add('done');
+        } else if (!steps.slice(0, i).includes(false)) {
+          el.classList.add('current');
         }
       }
-    });
-    setTimeout(checkSteps, 500);
-  }
-</script>
+      const doneCount = steps.filter(Boolean).length;
+      document.getElementById('progress').textContent =
+        doneCount === 3
+          ? 'Task completed! (3/3)'
+          : `Complete the steps... (${doneCount}/3)`;
+    }
+
+    window.onload = function() {
+      luckysheet.create({
+        container: 'luckysheet',
+        lang: 'en',
+        data: [
+          [{}, {}, {}, {}, {}, {}, {}, {}, {}, {}],
+          [{}, {}, {}, {}, {}, {}, {}, {}, {}, {}],
+          [{}, {}, {}, {}, {}, {}, {}, {}, {}, {}]
+        ],
+        showinfobar: true,
+        showtoolbar: true,
+        showsheetbar: true,
+        showstatisticBar: true,
+        allowEdit: true,
+        enableAddRow: true,
+        enableAddCol: true,
+        hook: {
+          rangeSelect: function (range) {
+            lastSelection = range;
+            setTimeout(checkSteps, 100);
+          },
+          cellUpdated: function (r, c, oldValue, newValue, isRefresh) {
+            setTimeout(checkSteps, 100);
+          }
+        }
+      });
+      setTimeout(checkSteps, 500);
+    }
+  </script>
 </body>
 </html>
