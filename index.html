@@ -2,13 +2,24 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Luckysheet — Trainer with Steps</title>
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/luckysheet@2.1.13/dist/plugins/css/plugins.css" />
+  <title>Luckysheet — 10x10 Strict Table</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/luckysheet@2.1.13/dist/plugins/css/pluginsCss.css" />
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/luckysheet@2.1.13/dist/css/luckysheet.css" />
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/luckysheet@2.1.13/dist/assets/iconfont/iconfont.css" />
   <style>
     html, body { height: 100%; margin: 0; padding: 0; }
-    #luckysheet { width: 100vw; height: auto !important; min-height: unset !important; max-height: unset !important; overflow: hidden !important; }
+    /* 10 columns * 100px + row header (40px) = 1040px */
+    /* 10 rows * 30px + col header (20px) = 320px */
+    #luckysheet {
+      width: 1040px;
+      height: 320px;
+      min-width: 1040px;
+      min-height: 320px;
+      max-width: 1040px;
+      max-height: 320px;
+      margin: 30px auto 0 auto;
+      overflow: hidden !important;
+    }
     #tasks { max-width: 600px; margin: 30px auto; font-family: Arial, sans-serif; }
     .task-block { background: #f7f7f7; border-radius: 8px; padding: 20px; }
     .task-title { font-size: 20px; font-weight: bold; margin-bottom: 10px; }
@@ -16,21 +27,6 @@
     .task-step.done { background: #d4edda !important; color: #155724 !important; font-weight: bold; }
     .task-step.current { background: #fff3cd !important; color: #856404 !important; }
     .task-progress { margin-top: 15px; font-size: 16px; }
-    /* Скрыть шапку, тулбар, инфобар, нижнюю панель */
-    #luckysheet_info, .luckysheet-demo-title, .luckysheet-toolbar, .luckysheet-info, .luckysheet-sheet-area, .luckysheet-stat-area {
-      display: none !important;
-    }
-    /* Убрать скроллы внутри таблицы */
-    .luckysheet-scrollbar-x, .luckysheet-scrollbar-y {
-      display: none !important;
-    }
-    /* Ограничить рабочую область */
-    .luckysheet-grid-container {
-      height: auto !important;
-      max-height: unset !important;
-      min-height: unset !important;
-      overflow: hidden !important;
-    }
   </style>
 </head>
 <body>
@@ -60,32 +56,27 @@
     }
 
     function checkSteps() {
-      // 1. Проверка: хотя бы раз выделили B1 (активная ячейка)
-      if (!step1done) {
-        const sheet = luckysheet.getAllSheets()[0];
-        const sel = sheet.luckysheet_select_save && sheet.luckysheet_select_save[0];
-        if (sel && sel.row && sel.column &&
-            sel.row[0] === 0 && sel.row[1] === 0 &&
-            sel.column[0] === 1 && sel.column[1] === 1
-        ) {
-          step1done = true;
-        }
+      const info = luckysheet.getRange();
+      if (
+        !step1done &&
+        info && info.length === 1 &&
+        info[0].row[0] === 0 && info[0].row[1] === 0 &&
+        info[0].column[0] === 1 && info[0].column[1] === 1
+      ) {
+        step1done = true;
       }
 
-      // 2. Проверка B2
       let valB2 = getCellValue(1, 1);
       if (!step2done && (valB2 === "100" || valB2 === 100)) step2done = true;
 
-      // 3. Проверка C3
       let valC3 = getCellValue(2, 2);
       if (!step3done && valC3 !== "" && !isNaN(Number(valC3))) step3done = true;
 
-      // Подсветка
       const steps = [step1done, step2done, step3done];
       for (let i = 0; i < 3; i++) {
         const el = document.getElementById('step-' + (i+1));
         el.classList.remove('done', 'current');
-        el.style.color = '#888'; // по умолчанию серый
+        el.style.color = '#888';
         if (steps[i]) {
           el.classList.add('done');
           el.style.color = '';
@@ -107,18 +98,14 @@
         lang: 'en',
         row: 10,
         column: 10,
-        data: Array.from({length: 10}, () => Array.from({length: 10}, () => ({}))),
+        data: Array.from({length: 10}, () => Array(10).fill({})),
         showinfobar: true,
         showtoolbar: true,
         showsheetbar: true,
         showstatisticBar: true,
         allowEdit: true,
-        allowAddRow: true,
-        allowAddColumn: true,
-        allowDeleteRow: true,
-        allowDeleteColumn: true,
-        enableAddRow: true,
-        enableAddCol: true,
+        enableAddRow: false,
+        enableAddCol: false,
         hook: {
           rangeSelect: function () {
             setTimeout(checkSteps, 100);
