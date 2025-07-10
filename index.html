@@ -46,15 +46,14 @@
 
     function checkSteps() {
       // 1. Проверка: хотя бы раз выделили B1 (активная ячейка)
-      if (!step1done) {
-        const sheet = luckysheet.getAllSheets()[0];
-        const sel = sheet.luckysheet_select_save && sheet.luckysheet_select_save[0];
-        if (sel && sel.row && sel.column &&
-            sel.row[0] === 0 && sel.row[1] === 0 &&
-            sel.column[0] === 1 && sel.column[1] === 1
-        ) {
-          step1done = true;
-        }
+      const info = luckysheet.getRange();
+      if (
+        !step1done &&
+        info && info.length === 1 &&
+        info[0].row[0] === 0 && info[0].row[1] === 0 &&
+        info[0].column[0] === 1 && info[0].column[1] === 1
+      ) {
+        step1done = true;
       }
 
       // 2. Проверка B2
@@ -90,18 +89,16 @@
       luckysheet.create({
         container: 'luckysheet',
         lang: 'en',
-        data: [
-          [{}, {}, {}, {}, {}, {}, {}, {}, {}, {}],
-          [{}, {}, {}, {}, {}, {}, {}, {}, {}, {}],
-          [{}, {}, {}, {}, {}, {}, {}, {}, {}, {}]
-        ],
+        row: 10,
+        column: 10,
+        data: Array.from({length: 10}, () => Array(10).fill({})),
         showinfobar: true,
         showtoolbar: true,
         showsheetbar: true,
         showstatisticBar: true,
         allowEdit: true,
-        enableAddRow: true,
-        enableAddCol: true,
+        enableAddRow: false,
+        enableAddCol: false,
         hook: {
           rangeSelect: function () {
             setTimeout(checkSteps, 100);
