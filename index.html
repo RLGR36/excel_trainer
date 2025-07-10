@@ -2,88 +2,134 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Luckysheet 10x10 без шапки и прокрутки</title>
-  <!-- Luckysheet CSS -->
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/luckysheet@2.1.13/dist/pluginsCss.css">
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/luckysheet@2.1.13/dist/luckysheet.css">
+  <title>Luckysheet — Trainer with Steps</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/luckysheet@2.1.13/dist/plugins/css/plugins.css" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/luckysheet@2.1.13/dist/css/luckysheet.css" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/luckysheet@2.1.13/dist/assets/iconfont/iconfont.css" />
   <style>
-    /* Убрать все панели и шапки */
-    .luckysheet_info,
-    .luckysheet-title,
-    .luckysheet-toolbar,
-    .luckysheet-bottom-bar,
-    .luckysheet-formula-bar-c,
-    .luckysheet-sheet-area,
-    .luckysheet-stat-area,
-    .luckysheet-cols-h-c,
-    .luckysheet-rows-h-c,
-    .luckysheet-scrollbar-x,
-    .luckysheet-scrollbar-y {
+    html, body { height: 100%; margin: 0; padding: 0; }
+    #luckysheet { width: 100vw; height: auto !important; min-height: unset !important; max-height: unset !important; overflow: hidden !important; }
+    #tasks { max-width: 600px; margin: 30px auto; font-family: Arial, sans-serif; }
+    .task-block { background: #f7f7f7; border-radius: 8px; padding: 20px; }
+    .task-title { font-size: 20px; font-weight: bold; margin-bottom: 10px; }
+    .task-step { background: #eaeaea; border-radius: 5px; margin: 8px 0; padding: 10px; font-size: 16px; transition: background 0.3s; color: #888; }
+    .task-step.done { background: #d4edda !important; color: #155724 !important; font-weight: bold; }
+    .task-step.current { background: #fff3cd !important; color: #856404 !important; }
+    .task-progress { margin-top: 15px; font-size: 16px; }
+    /* Скрыть шапку, тулбар, инфобар, нижнюю панель */
+    #luckysheet_info, .luckysheet-demo-title, .luckysheet-toolbar, .luckysheet-info, .luckysheet-sheet-area, .luckysheet-stat-area {
       display: none !important;
     }
-    /* Контейнер под размер таблицы */
-    #luckysheet {
-      /* 10 столбцов по 80px + 1px граница слева */
-      width: 801px;
-      /* 10 строк по 25px + 1px граница сверху */
-      height: 251px;
-      margin: 30px auto;
-      overflow: hidden !important;
-      border: 1px solid #ccc;
-      box-sizing: content-box;
+    /* Убрать скроллы внутри таблицы */
+    .luckysheet-scrollbar-x, .luckysheet-scrollbar-y {
+      display: none !important;
     }
-    /* Убрать отступы вокруг таблицы */
-    .luckysheet {
-      margin: 0 !important;
+    /* Ограничить рабочую область */
+    .luckysheet-grid-container {
+      height: auto !important;
+      max-height: unset !important;
+      min-height: unset !important;
+      overflow: hidden !important;
     }
   </style>
 </head>
 <body>
   <div id="luckysheet"></div>
-
-  <!-- Luckysheet JS -->
-  <script src="https://cdn.jsdelivr.net/npm/luckysheet@2.1.13/dist/plugins.js"></script>
+  <div id="tasks">
+    <div class="task-block">
+      <div class="task-title">Task 1: Basics</div>
+      <div id="step-1" class="task-step">1. Select cell <b>B1</b></div>
+      <div id="step-2" class="task-step">2. Enter <b>100</b> in cell <b>B2</b></div>
+      <div id="step-3" class="task-step">3. Enter any number in cell <b>C3</b></div>
+      <div id="progress" class="task-progress">Complete the steps... (0/3)</div>
+    </div>
+  </div>
+  <script src="https://cdn.jsdelivr.net/npm/luckysheet@2.1.13/dist/plugins/js/plugin.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/luckysheet@2.1.13/dist/luckysheet.umd.js"></script>
   <script>
+    let step1done = false, step2done = false, step3done = false;
+
+    function getCellValue(r, c) {
+      const data = luckysheet.getAllSheets()[0].data;
+      if (data && data[r] && data[r][c]) {
+        if (data[r][c].v !== undefined) return data[r][c].v;
+        if (data[r][c].m !== undefined) return data[r][c].m;
+        if (data[r][c].ct && data[r][c].ct.fa) return data[r][c].ct.fa;
+      }
+      return "";
+    }
+
+    function checkSteps() {
+      // 1. Проверка: хотя бы раз выделили B1 (активная ячейка)
+      if (!step1done) {
+        const sheet = luckysheet.getAllSheets()[0];
+        const sel = sheet.luckysheet_select_save && sheet.luckysheet_select_save[0];
+        if (sel && sel.row && sel.column &&
+            sel.row[0] === 0 && sel.row[1] === 0 &&
+            sel.column[0] === 1 && sel.column[1] === 1
+        ) {
+          step1done = true;
+        }
+      }
+
+      // 2. Проверка B2
+      let valB2 = getCellValue(1, 1);
+      if (!step2done && (valB2 === "100" || valB2 === 100)) step2done = true;
+
+      // 3. Проверка C3
+      let valC3 = getCellValue(2, 2);
+      if (!step3done && valC3 !== "" && !isNaN(Number(valC3))) step3done = true;
+
+      // Подсветка
+      const steps = [step1done, step2done, step3done];
+      for (let i = 0; i < 3; i++) {
+        const el = document.getElementById('step-' + (i+1));
+        el.classList.remove('done', 'current');
+        el.style.color = '#888'; // по умолчанию серый
+        if (steps[i]) {
+          el.classList.add('done');
+          el.style.color = '';
+        } else if (!steps.slice(0, i).includes(false)) {
+          el.classList.add('current');
+          el.style.color = '';
+        }
+      }
+      const doneCount = steps.filter(Boolean).length;
+      document.getElementById('progress').textContent =
+        doneCount === 3
+          ? 'Task completed! (3/3)'
+          : `Complete the steps... (${doneCount}/3)`;
+    }
+
     window.onload = function() {
       luckysheet.create({
         container: 'luckysheet',
         lang: 'en',
-        showinfobar: false,
-        showtoolbar: false,
-        showstatisticBar: false,
-        showsheetbar: false,
-        showrowbar: false,
-        showcolumnbar: false,
-        showFormulaBar: false,
         row: 10,
         column: 10,
+        data: Array.from({length: 10}, () => Array.from({length: 10}, () => ({}))),
+        showinfobar: false,
+        showtoolbar: false,
+        showsheetbar: false,
+        showstatisticBar: false,
         allowEdit: true,
         allowAddRow: false,
         allowAddColumn: false,
         allowDeleteRow: false,
         allowDeleteColumn: false,
-        allowInsertRow: false,
-        allowInsertColumn: false,
-        allowCopy: true,
-        allowMoveRow: false,
-        allowMoveColumn: false,
-        allowResizeRow: false,
-        allowResizeColumn: false,
-        rowHeaderWidth: 0,
-        columnHeaderHeight: 0,
-        defaultRowHeight: 25,
-        defaultColWidth: 80,
-        data: [
-          {
-            name: "Sheet1",
-            row: 10,
-            column: 10,
-            celldata: []
+        enableAddRow: false,
+        enableAddCol: false,
+        hook: {
+          rangeSelect: function () {
+            setTimeout(checkSteps, 100);
+          },
+          cellUpdated: function () {
+            setTimeout(checkSteps, 100);
           }
-        ]
+        }
       });
-    };
+      setTimeout(checkSteps, 500);
+    }
   </script>
 </body>
 </html>
