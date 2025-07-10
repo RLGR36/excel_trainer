@@ -2,33 +2,39 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Luckysheet 10x10 без шапки</title>
+  <title>Luckysheet 10x10 без шапки и прокрутки</title>
   <!-- Luckysheet CSS -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/luckysheet@2.1.13/dist/pluginsCss.css">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/luckysheet@2.1.13/dist/luckysheet.css">
   <style>
-    /* Убрать шапку */
-    .luckysheet_info, .luckysheet-title {
+    /* Убрать все панели и шапки */
+    .luckysheet_info,
+    .luckysheet-title,
+    .luckysheet-toolbar,
+    .luckysheet-bottom-bar,
+    .luckysheet-formula-bar-c,
+    .luckysheet-sheet-area,
+    .luckysheet-stat-area,
+    .luckysheet-cols-h-c,
+    .luckysheet-rows-h-c,
+    .luckysheet-scrollbar-x,
+    .luckysheet-scrollbar-y {
       display: none !important;
     }
-    /* Фиксированная высота и скрытие скроллов */
+    /* Контейнер под размер таблицы */
     #luckysheet {
-      width: 700px; /* ширина под 10 столбцов, подберите под себя */
-      height: 350px; /* высота под 10 строк, подберите под себя */
+      /* 10 столбцов по 80px + 1px граница слева */
+      width: 801px;
+      /* 10 строк по 25px + 1px граница сверху */
+      height: 251px;
       margin: 30px auto;
       overflow: hidden !important;
       border: 1px solid #ccc;
-      box-sizing: border-box;
+      box-sizing: content-box;
     }
-    .luckysheet-cols-h-c, .luckysheet-rows-h-c {
-      overflow: hidden !important;
-    }
-    .luckysheet-scrollbar-x, .luckysheet-scrollbar-y {
-      display: none !important;
-    }
-    /* Убрать нижнюю панель */
-    .luckysheet-bottom-bar {
-      display: none !important;
+    /* Убрать отступы вокруг таблицы */
+    .luckysheet {
+      margin: 0 !important;
     }
   </style>
 </head>
@@ -43,10 +49,13 @@
       luckysheet.create({
         container: 'luckysheet',
         lang: 'en',
-        showinfobar: false,      // убрать инфо-бар
-        showtoolbar: false,      // убрать тулбар
-        showstatisticBar: false, // убрать нижнюю панель
-        showsheetbar: false,     // убрать вкладки листов
+        showinfobar: false,
+        showtoolbar: false,
+        showstatisticBar: false,
+        showsheetbar: false,
+        showrowbar: false,
+        showcolumnbar: false,
+        showFormulaBar: false,
         row: 10,
         column: 10,
         allowEdit: true,
@@ -61,7 +70,10 @@
         allowMoveColumn: false,
         allowResizeRow: false,
         allowResizeColumn: false,
-        // Можно добавить другие параметры по необходимости
+        rowHeaderWidth: 0,
+        columnHeaderHeight: 0,
+        defaultRowHeight: 25,
+        defaultColWidth: 80,
         data: [
           {
             name: "Sheet1",
