@@ -2,24 +2,13 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Luckysheet — 10x10 Strict Table</title>
+  <title>Luckysheet — Trainer with Steps</title>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/luckysheet@2.1.13/dist/plugins/css/pluginsCss.css" />
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/luckysheet@2.1.13/dist/css/luckysheet.css" />
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/luckysheet@2.1.13/dist/assets/iconfont/iconfont.css" />
   <style>
     html, body { height: 100%; margin: 0; padding: 0; }
-    /* 10 columns * 100px + row header (40px) = 1040px */
-    /* 10 rows * 30px + col header (20px) = 320px */
-    #luckysheet {
-      width: 1040px;
-      height: 320px;
-      min-width: 1040px;
-      min-height: 320px;
-      max-width: 1040px;
-      max-height: 320px;
-      margin: 30px auto 0 auto;
-      overflow: hidden !important;
-    }
+    #luckysheet { width: 100vw; height: 400px; min-height: 300px; }
     #tasks { max-width: 600px; margin: 30px auto; font-family: Arial, sans-serif; }
     .task-block { background: #f7f7f7; border-radius: 8px; padding: 20px; }
     .task-title { font-size: 20px; font-weight: bold; margin-bottom: 10px; }
@@ -56,6 +45,7 @@
     }
 
     function checkSteps() {
+      // 1. Проверка: хотя бы раз выделили B1 (активная ячейка)
       const info = luckysheet.getRange();
       if (
         !step1done &&
@@ -66,17 +56,20 @@
         step1done = true;
       }
 
+      // 2. Проверка B2
       let valB2 = getCellValue(1, 1);
       if (!step2done && (valB2 === "100" || valB2 === 100)) step2done = true;
 
+      // 3. Проверка C3
       let valC3 = getCellValue(2, 2);
       if (!step3done && valC3 !== "" && !isNaN(Number(valC3))) step3done = true;
 
+      // Подсветка
       const steps = [step1done, step2done, step3done];
       for (let i = 0; i < 3; i++) {
         const el = document.getElementById('step-' + (i+1));
         el.classList.remove('done', 'current');
-        el.style.color = '#888';
+        el.style.color = '#888'; // по умолчанию серый
         if (steps[i]) {
           el.classList.add('done');
           el.style.color = '';
