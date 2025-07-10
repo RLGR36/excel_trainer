@@ -12,7 +12,7 @@
     #tasks { max-width: 600px; margin: 30px auto; font-family: Arial, sans-serif; }
     .task-block { background: #f7f7f7; border-radius: 8px; padding: 20px; }
     .task-title { font-size: 20px; font-weight: bold; margin-bottom: 10px; }
-    .task-step { background: #eaeaea; border-radius: 5px; margin: 8px 0; padding: 10px; font-size: 16px; transition: background 0.3s; }
+    .task-step { background: #eaeaea; border-radius: 5px; margin: 8px 0; padding: 10px; font-size: 16px; transition: background 0.3s; color: #888; }
     .task-step.done { background: #d4edda !important; color: #155724 !important; font-weight: bold; }
     .task-step.current { background: #fff3cd !important; color: #856404 !important; }
     .task-progress { margin-top: 15px; font-size: 16px; }
@@ -46,11 +46,11 @@
     }
 
     function checkSteps() {
-      // 1. Проверка: хотя бы раз выделили A1
+      // 1. Проверка: хотя бы раз выделили B1
       if (!step1done && lastSelection &&
           lastSelection.length === 1 &&
           lastSelection[0].row[0] === 0 && lastSelection[0].row[1] === 0 &&
-          lastSelection[0].column[0] === 0 && lastSelection[0].column[1] === 0
+          lastSelection[0].column[0] === 1 && lastSelection[0].column[1] === 1
       ) {
         step1done = true;
       }
@@ -68,10 +68,14 @@
       for (let i = 0; i < 3; i++) {
         const el = document.getElementById('step-' + (i+1));
         el.classList.remove('done', 'current');
+        // По умолчанию все шаги серые (task-step)
+        el.style.color = '#888';
         if (steps[i]) {
           el.classList.add('done');
+          el.style.color = '';
         } else if (!steps.slice(0, i).includes(false)) {
           el.classList.add('current');
+          el.style.color = '';
         }
       }
       const doneCount = steps.filter(Boolean).length;
