@@ -32,7 +32,6 @@
   <script src="https://cdn.jsdelivr.net/npm/luckysheet@2.1.13/dist/plugins/js/plugin.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/luckysheet@2.1.13/dist/luckysheet.umd.js"></script>
   <script>
-    let lastSelection = null;
     let step1done = false, step2done = false, step3done = false;
 
     function getCellValue(r, c) {
@@ -46,13 +45,16 @@
     }
 
     function checkSteps() {
-      // 1. Проверка: хотя бы раз выделили B1
-      if (!step1done && lastSelection &&
-          lastSelection.length === 1 &&
-          lastSelection[0].row[0] === 0 && lastSelection[0].row[1] === 0 &&
-          lastSelection[0].column[0] === 1 && lastSelection[0].column[1] === 1
-      ) {
-        step1done = true;
+      // 1. Проверка: хотя бы раз выделили B1 (активная ячейка)
+      if (!step1done) {
+        const sheet = luckysheet.getAllSheets()[0];
+        const sel = sheet.luckysheet_select_save && sheet.luckysheet_select_save[0];
+        if (sel && sel.row && sel.column &&
+            sel.row[0] === 0 && sel.row[1] === 0 &&
+            sel.column[0] === 1 && sel.column[1] === 1
+        ) {
+          step1done = true;
+        }
       }
 
       // 2. Проверка B2
@@ -68,8 +70,7 @@
       for (let i = 0; i < 3; i++) {
         const el = document.getElementById('step-' + (i+1));
         el.classList.remove('done', 'current');
-        // По умолчанию все шаги серые (task-step)
-        el.style.color = '#888';
+        el.style.color = '#888'; // по умолчанию серый
         if (steps[i]) {
           el.classList.add('done');
           el.style.color = '';
@@ -102,11 +103,10 @@
         enableAddRow: true,
         enableAddCol: true,
         hook: {
-          rangeSelect: function (range) {
-            lastSelection = range;
+          rangeSelect: function () {
             setTimeout(checkSteps, 100);
           },
-          cellUpdated: function (r, c, oldValue, newValue, isRefresh) {
+          cellUpdated: function () {
             setTimeout(checkSteps, 100);
           }
         }
