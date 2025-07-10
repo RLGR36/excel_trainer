@@ -1,8 +1,8 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Luckysheet — Тренажёр с заданиями</title>
+  <title>Luckysheet — Trainer with Steps</title>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/luckysheet@2.1.13/dist/plugins/css/pluginsCss.css" />
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/luckysheet@2.1.13/dist/css/luckysheet.css" />
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/luckysheet@2.1.13/dist/assets/iconfont/iconfont.css" />
@@ -22,11 +22,11 @@
   <div id="luckysheet"></div>
   <div id="tasks">
     <div class="task-block">
-      <div class="task-title">Задание 1: Основы работы</div>
-      <div id="step-1" class="task-step">1. Выделите ячейку <b>A1</b></div>
-      <div id="step-2" class="task-step">2. Введите <b>100</b> в ячейку <b>B2</b></div>
-      <div id="step-3" class="task-step">3. Введите любое число в ячейку <b>C3</b></div>
-      <div id="progress" class="task-progress">Выполняйте шаги задания... (0/3)</div>
+      <div class="task-title">Task 1: Basics</div>
+      <div id="step-1" class="task-step">1. Select cell <b>A1</b></div>
+      <div id="step-2" class="task-step">2. Enter <b>100</b> in cell <b>B2</b></div>
+      <div id="step-3" class="task-step">3. Enter any number in cell <b>C3</b></div>
+      <div id="progress" class="task-progress">Complete the steps... (0/3)</div>
     </div>
   </div>
   <script src="https://cdn.jsdelivr.net/npm/luckysheet@2.1.13/dist/plugins/js/plugin.js"></script>
@@ -48,8 +48,8 @@
       const doneCount = steps.filter(Boolean).length;
       document.getElementById('progress').textContent =
         doneCount === 3
-          ? 'Задание выполнено! (3/3)'
-          : `Выполняйте шаги задания... (${doneCount}/3)`;
+          ? 'Task completed! (3/3)'
+          : `Complete the steps... (${doneCount}/3)`;
     }
 
     window.onload = function() {
@@ -69,6 +69,7 @@
         enableAddRow: true,
         enableAddCol: true,
         hook: {
+          // 1. Check selection of A1
           rangeSelect: function (range) {
             if (
               range.length === 1 &&
@@ -79,11 +80,14 @@
               updateSteps();
             }
           },
+          // 2. Check input in B2, 3. Check any number in C3
           cellUpdated: function (r, c, oldValue, newValue, isRefresh) {
+            // B2: r=1, c=1
             if (r === 1 && c === 1 && newValue === "100") {
               steps[1] = true;
               updateSteps();
             }
+            // C3: r=2, c=2
             if (r === 2 && c === 2 && !isNaN(Number(newValue)) && newValue !== "") {
               steps[2] = true;
               updateSteps();
