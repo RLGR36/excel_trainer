@@ -13,8 +13,8 @@
     .task-block { background: #f7f7f7; border-radius: 8px; padding: 20px; }
     .task-title { font-size: 20px; font-weight: bold; margin-bottom: 10px; }
     .task-step { background: #eaeaea; border-radius: 5px; margin: 8px 0; padding: 10px; font-size: 16px; transition: background 0.3s; }
-    .task-step.done { background: #d4edda; color: #155724; font-weight: bold; }
-    .task-step.current { background: #fff3cd; color: #856404; }
+    .task-step.done { background: #d4edda !important; color: #155724 !important; font-weight: bold; }
+    .task-step.current { background: #fff3cd !important; color: #856404 !important; }
     .task-progress { margin-top: 15px; font-size: 16px; }
   </style>
 </head>
@@ -32,9 +32,32 @@
   <script src="https://cdn.jsdelivr.net/npm/luckysheet@2.1.13/dist/plugins/js/plugin.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/luckysheet@2.1.13/dist/luckysheet.umd.js"></script>
   <script>
-    let steps = [false, false, false];
+    let lastSelection = null;
+    let cellData = {};
 
-    function updateSteps() {
+    function checkSteps() {
+      // 1. Проверка выделения A1
+      let step1 = false;
+      if (lastSelection &&
+          lastSelection.length === 1 &&
+          lastSelection[0].row[0] === 0 && lastSelection[0].row[1] === 0 &&
+          lastSelection[0].column[0] === 0 && lastSelection[0].column[1] === 0
+      ) {
+        step1 = true;
+      }
+
+      // 2. Проверка B2
+      let step2 = false;
+      let valB2 = getCellValue(1, 1);
+      if (valB2 === "100" || valB2 === 100) step2 = true;
+
+      // 3. Проверка C3
+      let step3 = false;
+      let valC3 = getCellValue(2, 2);
+      if (valC3 !== "" && !isNaN(Number(valC3))) step3 = true;
+
+      // Подсветка
+      const steps = [step1, step2, step3];
       for (let i = 0; i < 3; i++) {
         const el = document.getElementById('step-' + (i+1));
         el.classList.remove('done', 'current');
@@ -42,7 +65,6 @@
           el.classList.add('done');
         } else if (!steps.slice(0, i).includes(false)) {
           el.classList.add('current');
-          break;
         }
       }
       const doneCount = steps.filter(Boolean).length;
@@ -50,6 +72,15 @@
         doneCount === 3
           ? 'Task completed! (3/3)'
           : `Complete the steps... (${doneCount}/3)`;
+    }
+
+    function getCellValue(r, c) {
+      // Используем Luckysheet API для получения значения ячейки
+      const data = luckysheet.getAllSheets()[0].data;
+      if (data && data[r] && data[r][c] && data[r][c].v !== undefined) {
+        return data[r][c].v;
+      }
+      return "";
     }
 
     window.onload = function() {
@@ -69,33 +100,16 @@
         enableAddRow: true,
         enableAddCol: true,
         hook: {
-          // 1. Check selection of A1
           rangeSelect: function (range) {
-            if (
-              range.length === 1 &&
-              range[0].row[0] === 0 && range[0].row[1] === 0 &&
-              range[0].column[0] === 0 && range[0].column[1] === 0
-            ) {
-              steps[0] = true;
-              updateSteps();
-            }
+            lastSelection = range;
+            setTimeout(checkSteps, 100);
           },
-          // 2. Check input in B2, 3. Check any number in C3
           cellUpdated: function (r, c, oldValue, newValue, isRefresh) {
-            // B2: r=1, c=1
-            if (r === 1 && c === 1 && newValue === "100") {
-              steps[1] = true;
-              updateSteps();
-            }
-            // C3: r=2, c=2
-            if (r === 2 && c === 2 && !isNaN(Number(newValue)) && newValue !== "") {
-              steps[2] = true;
-              updateSteps();
-            }
+            setTimeout(checkSteps, 100);
           }
         }
       });
-      updateSteps();
+      setTimeout(checkSteps, 500);
     }
   </script>
 </body>
